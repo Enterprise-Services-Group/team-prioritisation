@@ -288,10 +288,10 @@ const CARDS = [
 ];
 
 const PRINCIPLES = [
-  { title:"Sprints are not fixed commitments", body:"If complexity emerges, we adapt. Re-scoping, slowing down, or moving work forward is considered good judgement — not failure." },
+  { title:"Sprints are not fixed commitments", body:"If complexity emerges, we adapt. Re-scoping, slowing down, or moving work forward is considered good judgement, not failure." },
   { title:"Less, but better", body:"Quality, clarity, and thoughtful delivery are more valuable than trying to do everything at once." },
   { title:"Preparation matters", body:"The more shared understanding and shaping that happens before work enters a sprint, the more confident and sustainable delivery becomes." },
-  { title:"Sustainable pace is the goal", body:"We are aiming for a healthy and maintainable rhythm of work — one that protects focus, quality, collaboration, and wellbeing over time." },
+  { title:"Sustainable pace is the goal", body:"We are aiming for a healthy and maintainable rhythm of work, one that protects focus, quality, collaboration, and wellbeing over time." },
   { title:"Surface things early", body:"We want to create an environment where complexity, concerns, trade-offs, and changing expectations can be raised early and discussed openly." },
   { title:"Collaboration strengthens outcomes", body:"Open communication, shared problem solving, and intentional collaboration help create stronger delivery outcomes and healthier team dynamics." },
   { title:"Continuous improvement over perfection", body:"This exercise is about identifying small, achievable experiments that we can trial, reflect on, and continue improving together." },
@@ -411,7 +411,7 @@ function WelcomeScreen({ onVote, onDashboard }) {
         <div className="hero-inner">
           <div className="hero-tag">Team Workshop</div>
           <h1>What should we try first?</h1>
-          <p>Privately sort improvement ideas into priorities. Export your results — we'll combine them to see where the team aligns.</p>
+          <p>Privately sort improvement ideas into priorities. Export your results and we will combine them to see where the team aligns.</p>
           <div className="btn-row">
             <button className="btn-primary" onClick={onVote}>Start prioritising</button>
             <button className="btn-secondary" onClick={onDashboard}>View combined results</button>
@@ -424,7 +424,7 @@ function WelcomeScreen({ onVote, onDashboard }) {
         <div className="steps-grid">
           {[
             { n:'01', t:'Read the cards', b:'Explore each improvement idea. Double-click any card to learn what it means and why it matters.' },
-            { n:'02', t:'Sort into columns', b:'Drag each card into one of four priority columns — from Trial Immediately through to Park for Now.' },
+            { n:'02', t:'Sort into columns', b:'Drag each card into one of four priority columns, from Trial Immediately through to Park for Now.' },
             { n:'03', t:'Export and send', b:'Download your results as a CSV and email it to Damian. Results are shown anonymously.' },
           ].map((s,i) => (
             <div className="step-card" key={i}>
@@ -500,7 +500,7 @@ function VotingScreen({ onBack, onDashboard }) {
     const col = COLUMNS.find(c => c.id === colId);
     const already = placements[dragCard.current.id] === colId;
     if (col.max && !already && countInCol(colId) >= col.max) {
-      setLimitMsg(`"${col.label}" is limited to ${col.max} cards — move one out first.`);
+      setLimitMsg(`"${col.label}" is limited to ${col.max} cards. Please move one out first.`);
       setTimeout(() => setLimitMsg(''), 3500);
       return;
     }
@@ -530,7 +530,7 @@ function VotingScreen({ onBack, onDashboard }) {
     exportCSV(placements);
     saveLocal(placements);
     setExported(true);
-    setMsg({ text:'✓ CSV downloaded — email it to Damian to include in the combined results.', type:'success' });
+    setMsg({ text:'✓ CSV downloaded. Email it to Damian to include in the combined results.', type:'success' });
   }
 
   function handleReset() {
@@ -548,7 +548,7 @@ function VotingScreen({ onBack, onDashboard }) {
       {/* Top bar */}
       <div className="topbar">
         <div className="topbar-left">
-          <button className="back-btn" onClick={onBack}>← Home</button>
+          <button className="back-btn" onClick={onBack}>Back</button>
           <div className="progress-wrap">
             <div className="progress-bar-bg">
               <div className="progress-bar-fill" style={{width:`${pct}%`}} />
@@ -564,7 +564,7 @@ function VotingScreen({ onBack, onDashboard }) {
       {/* Banners */}
       {returning && (
         <div className="banner banner-green">
-          <span>Your previous prioritisation has been restored — keep going or adjust anytime.</span>
+          <span>Your previous prioritisation has been restored. Keep going or adjust anytime.</span>
           <button className="banner-close" onClick={() => setReturning(false)}>✕</button>
         </div>
       )}
@@ -752,17 +752,17 @@ function Dashboard({ onBack, onVote }) {
     'trial-immediately': { period:'June', sub:'Top "Trial Immediately" experiments' },
     'trial-soon':        { period:'July', sub:'Most supported "Trial Soon" improvements' },
     'worth-exploring':   { period:'August', sub:'"Worth Exploring" initiatives' },
-    'park-for-now':      { period:'Future / Backlog', sub:'"Park for Now" — revisit later' },
+    'park-for-now':      { period:'Future / Backlog', sub:'"Park for Now: revisit later' },
   };
 
   return (
     <div className="screen fade-in">
       <div className="topbar">
         <div className="topbar-left">
-          <button className="back-btn" onClick={onBack}>← Home</button>
+          <button className="back-btn" onClick={onBack}>Back</button>
           <span style={{fontSize:'13px',fontWeight:'800',color:'#444',textTransform:'uppercase',letterSpacing:'0.08em'}}>Combined Results</span>
         </div>
-        <button className="topbar-btn" onClick={onVote}>Go to voting →</button>
+        <button className="topbar-btn" onClick={onVote}>Go to voting</button>
       </div>
 
       <div className="dash-content">
