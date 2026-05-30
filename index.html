@@ -128,6 +128,13 @@
     .col-stone .col-badge { background:#78716c; color:#fff; }
     .col-stone .col-sub { color:#78716c; }
 
+    .col-teal .col-header { background:#f0fdfb; border-color:#0f766e; }
+    .col-teal .col-title { color:#134e4a; }
+    .col-teal .col-badge { background:#0f766e; color:#fff; }
+    .col-teal .col-sub { color:#0f766e; }
+    .col-teal .placed-card .col-stripe { background:#0f766e; }
+    .col-teal .drop-zone.over { background:#f0fdfb; border-color:#0f766e; border-style:solid; }
+
     /* Drop zone */
     .drop-zone { flex:1; border-radius:12px; border:2px dashed #d4d4d0; padding:8px; display:flex; flex-direction:column; gap:8px; min-height:120px; transition:all 0.15s; background:#fafafa; }
     .drop-zone.over { background:#f0f7f0; border-color:#4a8a4a; border-style:solid; }
@@ -298,10 +305,10 @@ const PRINCIPLES = [
 ];
 
 const COLUMNS = [
-  { id:'trial-immediately', label:'Trial Immediately', sublabel:'Start these first', max:5, theme:'col-green', barColor:'#4a8a4a', badgeBg:'#4a8a4a', badgeColor:'#fff', score:4 },
-  { id:'trial-soon',        label:'Trial Soon',        sublabel:'Introduce in the next wave', max:5, theme:'col-blue',  barColor:'#3b82f6', badgeBg:'#3b82f6', badgeColor:'#fff', score:3 },
-  { id:'worth-exploring',   label:'Worth Exploring',   sublabel:'', max:null, theme:'col-amber', barColor:'#f59e0b', badgeBg:'#f59e0b', badgeColor:'#fff', score:2 },
-  { id:'park-for-now',      label:'Park for Now',      sublabel:'Lower priority right now', max:null, theme:'col-stone', barColor:'#a8a29e', badgeBg:'#78716c', badgeColor:'#fff', score:1 },
+  { id:'trial-immediately', label:'Trial Immediately', sublabel:'June', max:5, theme:'col-green', barColor:'#4a8a4a', badgeBg:'#4a8a4a', badgeColor:'#fff', score:4 },
+  { id:'trial-soon',        label:'Trial Soon',        sublabel:'July', max:5, theme:'col-blue',  barColor:'#3b82f6', badgeBg:'#3b82f6', badgeColor:'#fff', score:3 },
+  { id:'worth-exploring',   label:'Worth Exploring',   sublabel:'August', max:null, theme:'col-amber', barColor:'#f59e0b', badgeBg:'#f59e0b', badgeColor:'#fff', score:2 },
+  { id:'park-for-now',      label:'BAU / Foundational Principles', sublabel:'From day 1', max:null, theme:'col-teal', barColor:'#0f766e', badgeBg:'#0f766e', badgeColor:'#fff', score:1 },
 ];
 
 const COL_SCORE = {};
@@ -424,7 +431,7 @@ function WelcomeScreen({ onVote, onDashboard }) {
         <div className="steps-grid">
           {[
             { n:'01', t:'Read the cards', b:'Explore each improvement idea. Double-click any card to learn what it means and why it matters.' },
-            { n:'02', t:'Sort into columns', b:'Drag each card into one of four priority columns, from Trial Immediately through to Park for Now.' },
+            { n:'02', t:'Prioritise the team improvements', b:'Drag each card into the area that best reflects how the team should approach it. Some cards represent experiments to actively trial first, while others represent foundational working principles and healthy delivery behaviours that should simply become part of how we work together from day one. There are no right or wrong answers.' },
             { n:'03', t:'Export and send', b:'Download your results as a CSV and email it to Damian. Results are shown anonymously.' },
           ].map((s,i) => (
             <div className="step-card" key={i}>
@@ -500,7 +507,7 @@ function VotingScreen({ onBack, onDashboard }) {
     const col = COLUMNS.find(c => c.id === colId);
     const already = placements[dragCard.current.id] === colId;
     if (col.max && !already && countInCol(colId) >= col.max) {
-      setLimitMsg(`"${col.label}" is limited to ${col.max} cards. Please move one out first.`);
+      setLimitMsg(`"${col.label}" is limited to ${col.max} cards. Please move one out first to continue.`);
       setTimeout(() => setLimitMsg(''), 3500);
       return;
     }
@@ -752,8 +759,11 @@ function Dashboard({ onBack, onVote }) {
     'trial-immediately': { period:'June', sub:'Top "Trial Immediately" experiments' },
     'trial-soon':        { period:'July', sub:'Most supported "Trial Soon" improvements' },
     'worth-exploring':   { period:'August', sub:'"Worth Exploring" initiatives' },
-    'park-for-now':      { period:'Future / Backlog', sub:'"Park for Now: revisit later' },
   };
+
+  // Separate BAU cards from roadmap waves
+  const bauCards = cardStats.filter(cs => cs.votedCount > 0 && cs.topCol?.id === 'park-for-now');
+  const roadmapWaves = waveGroups.filter(w => w.col.id !== 'park-for-now');
 
   return (
     <div className="screen fade-in">
@@ -852,12 +862,12 @@ function Dashboard({ onBack, onVote }) {
                     .sort((a,b) => b.colCounts[col.id] - a.colCounts[col.id]);
                   return (
                     <div key={col.id} className="breakdown-col" style={{
-                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':col.theme==='col-amber'?'#fffbeb':'#f5f5f3',
+                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':col.theme==='col-amber'?'#fffbeb':col.theme==='col-teal'?'#f0fdfb':'#f5f5f3',
                       borderColor: col.barColor,
                     }}>
                       <div className="breakdown-col-header">
                         <div className="breakdown-dot" style={{background:col.barColor}} />
-                        <div className="breakdown-col-title" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':col.theme==='col-amber'?'#92400e':'#44403c'}}>
+                        <div className="breakdown-col-title" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':col.theme==='col-amber'?'#92400e':col.theme==='col-teal'?'#134e4a':'#44403c'}}>
                           {col.label}
                         </div>
                         <span className="col-badge" style={{background:col.badgeBg,color:col.badgeColor,fontSize:'12px',padding:'3px 10px',borderRadius:'20px',fontWeight:'800'}}>
@@ -900,17 +910,18 @@ function Dashboard({ onBack, onVote }) {
                 <p style={{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'20px'}}>
                   Suggested implementation roadmap based on combined priorities
                 </p>
-                {waveGroups.map(({col, cards}) => {
+                {roadmapWaves.map(({col, cards}) => {
                   const wl = WAVE_LABELS[col.id];
+                  if (!wl) return null;
                   return (
                     <div key={col.id} className="wave-block" style={{
-                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':col.theme==='col-amber'?'#fffbeb':'#f5f5f3',
+                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':'#fffbeb',
                       borderColor: col.barColor,
                     }}>
                       <div className="wave-header">
                         <div className="wave-dot" style={{background:col.barColor}} />
                         <div>
-                          <div className="wave-label" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':col.theme==='col-amber'?'#92400e':'#44403c'}}>
+                          <div className="wave-label" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':'#92400e'}}>
                             {wl.period}
                           </div>
                           <div className="wave-sub">{wl.sub}</div>
@@ -942,6 +953,40 @@ function Dashboard({ onBack, onVote }) {
                     </div>
                   );
                 })}
+
+                {/* BAU / Foundational Principles section */}
+                {bauCards.length > 0 && (
+                  <div className="wave-block" style={{background:'#f0fdfb', borderColor:'#0f766e', borderWidth:'2px', marginTop:'8px'}}>
+                    <div className="wave-header">
+                      <div className="wave-dot" style={{background:'#0f766e'}} />
+                      <div>
+                        <div className="wave-label" style={{color:'#134e4a'}}>Foundational Working Principles</div>
+                        <div className="wave-sub">Embed into everyday team practice from day one</div>
+                      </div>
+                      <div className="wave-count">{bauCards.length} practice{bauCards.length!==1?'s':''}</div>
+                    </div>
+                    <p style={{fontSize:'13px',color:'#0f766e',fontWeight:'600',marginBottom:'12px',lineHeight:'1.6'}}>
+                      These are not experiments or deferred items. They are ongoing behaviours, communication expectations and delivery principles that should be embedded into how the team works together from the start.
+                    </p>
+                    <div className="wave-cards">
+                      {bauCards.map(cs => (
+                        <div className="wave-card" key={cs.card.id} style={{borderColor:'#99f6e4', borderWidth:'2px'}}>
+                          <div style={{fontSize:'10px',fontWeight:'800',color:'#0f766e',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'4px'}}>Foundational practice</div>
+                          <div className="wave-card-title">{cs.card.title}</div>
+                          <div className="wave-card-sub">{cs.card.shortSummary}</div>
+                          {cs.alignment && (
+                            <div className="wave-card-meta" style={{marginTop:'6px'}}>
+                              <div className={`align-badge ${cs.alignment.cls}`} style={{fontSize:'11px'}}>
+                                <div className="align-dot" />
+                                {cs.alignment.label}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
