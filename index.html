@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Team Prioritisation Workshop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f2f2f0; color: #1c1c1c; -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #a8a29e; border-radius: 2px; }
+    * { scrollbar-width: thin; scrollbar-color: #a8a29e transparent; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideIn { from { opacity:0; transform:translateX(-8px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes popIn { from { opacity:0; transform:scale(0.94); } to { opacity:1; transform:scale(1); } }
+    .fade-in { animation: fadeIn 0.4s ease both; }
+    .pop-in { animation: popIn 0.25s ease both; }
+
+    /* Layout */
+    .screen { min-height: 100vh; }
+
+    /* Hero */
+    .hero { background: #2d5a2d; padding: 72px 32px; text-align: center; position: relative; overflow: hidden; }
+    .hero::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse at 30% 0%, rgba(255,255,255,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 100%, rgba(255,255,255,0.05) 0%, transparent 60%); }
+    .hero-inner { position:relative; max-width:680px; margin:0 auto; }
+    .hero-tag { font-size:11px; font-weight:800; letter-spacing:0.15em; text-transform:uppercase; color:#a8d5a8; margin-bottom:16px; }
+    .hero h1 { font-size:clamp(28px,5vw,44px); font-weight:700; color:#fff; line-height:1.2; margin-bottom:16px; }
+    .hero p { font-size:16px; color:#c8e6c8; line-height:1.7; margin-bottom:36px; }
+    .btn-row { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .btn-primary { padding:14px 28px; background:#fff; color:#2d5a2d; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; transition:all 0.15s; box-shadow:0 2px 12px rgba(0,0,0,0.15); }
+    .btn-primary:hover { background:#f0f7f0; transform:translateY(-1px); box-shadow:0 4px 16px rgba(0,0,0,0.2); }
+    .btn-secondary { padding:14px 28px; background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.5); border-radius:12px; font-size:15px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+    .btn-secondary:hover { background:rgba(255,255,255,0.1); border-color:rgba(255,255,255,0.8); }
+
+    /* Cards grid */
+    .section { max-width:900px; margin:0 auto; padding:48px 24px; }
+    .section-title { font-size:22px; font-weight:800; color:#1c1c1c; text-align:center; margin-bottom:8px; }
+    .section-sub { font-size:14px; color:#6b6b6b; text-align:center; margin-bottom:32px; }
+    .steps-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:16px; margin-bottom:48px; }
+    .step-card { background:#fff; border:2px solid #e5e5e3; border-radius:16px; padding:24px; }
+    .step-num { font-size:11px; font-weight:800; color:#4a8a4a; letter-spacing:0.12em; text-transform:uppercase; margin-bottom:8px; }
+    .step-card h3 { font-size:15px; font-weight:700; color:#1c1c1c; margin-bottom:8px; }
+    .step-card p { font-size:13px; color:#6b6b6b; line-height:1.6; }
+    .principles-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(340px,1fr)); gap:12px; }
+    .principle { background:#fff; border:2px solid #e5e5e3; border-radius:14px; padding:18px 20px; display:flex; gap:14px; align-items:flex-start; }
+    .principle-dot { width:8px; height:8px; border-radius:50%; background:#4a8a4a; flex-shrink:0; margin-top:5px; }
+    .principle h4 { font-size:13px; font-weight:700; color:#1c1c1c; margin-bottom:4px; }
+    .principle p { font-size:13px; color:#5a5a5a; line-height:1.6; }
+
+    /* Top bar */
+    .topbar { background:#fff; border-bottom:2px solid #e5e5e3; padding:0 20px; display:flex; align-items:center; justify-content:space-between; height:56px; position:sticky; top:0; z-index:100; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
+    .topbar-left { display:flex; align-items:center; gap:16px; }
+    .topbar-right { display:flex; align-items:center; gap:8px; }
+    .back-btn { font-size:13px; font-weight:600; color:#555; background:none; border:none; cursor:pointer; display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:8px; transition:all 0.15s; }
+    .back-btn:hover { background:#f5f5f3; color:#1c1c1c; }
+    .progress-wrap { display:flex; align-items:center; gap:10px; }
+    .progress-bar-bg { width:120px; height:8px; background:#e5e5e3; border-radius:4px; overflow:hidden; }
+    .progress-bar-fill { height:100%; background:#4a8a4a; border-radius:4px; transition:width 0.4s ease; }
+    .progress-label { font-size:12px; font-weight:700; color:#6b6b6b; }
+    .topbar-btn { font-size:13px; font-weight:600; color:#4a8a4a; background:none; border:2px solid #4a8a4a; padding:6px 14px; border-radius:8px; cursor:pointer; transition:all 0.15s; }
+    .topbar-btn:hover { background:#4a8a4a; color:#fff; }
+
+    /* Banner */
+    .banner { padding:12px 20px; font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:space-between; }
+    .banner-green { background:#2d5a2d; color:#fff; }
+    .banner-amber { background:#f59e0b; color:#1c1c1c; }
+    .banner-close { background:none; border:none; cursor:pointer; font-weight:800; font-size:15px; opacity:0.7; color:inherit; padding:0 4px; }
+    .banner-close:hover { opacity:1; }
+
+    /* Voting workspace */
+    .workspace { display:flex; height:calc(100vh - 56px); overflow:hidden; }
+
+    /* Library */
+    .library { width:240px; flex-shrink:0; background:#fff; border-right:2px solid #e5e5e3; display:flex; flex-direction:column; }
+    .library-header { padding:14px 16px; border-bottom:2px solid #e5e5e3; background:#f7f7f5; }
+    .library-header h2 { font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; color:#2d2d2d; }
+    .library-header p { font-size:12px; color:#777; margin-top:3px; font-weight:500; }
+    .library-cards { flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:8px; }
+    .lib-card { background:#fff; border:2px solid #d4d4d0; border-radius:12px; padding:12px; cursor:grab; transition:all 0.15s; user-select:none; }
+    .lib-card:hover { border-color:#4a8a4a; box-shadow:0 2px 8px rgba(0,0,0,0.1); transform:translateY(-1px); }
+    .lib-card:active { cursor:grabbing; }
+    .lib-card h3 { font-size:12px; font-weight:700; color:#1c1c1c; line-height:1.4; margin-bottom:4px; }
+    .lib-card p { font-size:11px; color:#777; line-height:1.5; }
+    .lib-card .hint { font-size:10px; color:#bbb; margin-top:6px; font-weight:500; }
+    .lib-card:hover .hint { color:#4a8a4a; }
+    .all-placed { text-align:center; padding:32px 16px; color:#999; }
+    .all-placed .tick { font-size:28px; margin-bottom:8px; }
+    .all-placed p { font-size:13px; font-weight:600; color:#555; }
+    .all-placed small { font-size:11px; color:#aaa; }
+
+    /* Columns area */
+    .columns-area { flex:1; overflow-x:auto; overflow-y:auto; padding:16px; }
+    .columns-inner { display:flex; gap:14px; min-width:max-content; height:100%; }
+
+    /* Column */
+    .col-wrap { width:220px; flex-shrink:0; display:flex; flex-direction:column; }
+    .col-header { border-radius:12px; padding:12px 14px; margin-bottom:10px; border:2px solid; }
+    .col-header-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:3px; }
+    .col-title { font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.1em; }
+    .col-badge { font-size:11px; font-weight:800; padding:2px 8px; border-radius:20px; }
+    .col-sub { font-size:11px; font-weight:500; }
+    .col-limit-warn { font-size:11px; font-weight:700; color:#dc2626; margin-top:4px; }
+
+    .col-green .col-header { background:#f0f7f0; border-color:#4a8a4a; }
+    .col-green .col-title { color:#2d5a2d; }
+    .col-green .col-badge { background:#4a8a4a; color:#fff; }
+    .col-green .col-sub { color:#4a7a4a; }
+
+    .col-blue .col-header { background:#eff6ff; border-color:#3b82f6; }
+    .col-blue .col-title { color:#1d4ed8; }
+    .col-blue .col-badge { background:#3b82f6; color:#fff; }
+    .col-blue .col-sub { color:#2563eb; }
+
+    .col-amber .col-header { background:#fffbeb; border-color:#f59e0b; }
+    .col-amber .col-title { color:#92400e; }
+    .col-amber .col-badge { background:#f59e0b; color:#fff; }
+    .col-amber .col-sub { color:#b45309; }
+
+    .col-stone .col-header { background:#f5f5f3; border-color:#a8a29e; }
+    .col-stone .col-title { color:#44403c; }
+    .col-stone .col-badge { background:#78716c; color:#fff; }
+    .col-stone .col-sub { color:#78716c; }
+
+    /* Drop zone */
+    .drop-zone { flex:1; border-radius:12px; border:2px dashed #d4d4d0; padding:8px; display:flex; flex-direction:column; gap:8px; min-height:120px; transition:all 0.15s; background:#fafafa; }
+    .drop-zone.over { background:#f0f7f0; border-color:#4a8a4a; border-style:solid; }
+    .drop-zone.over-limit { background:#fff5f5; border-color:#ef4444; border-style:solid; }
+    .drop-zone.col-blue.over { background:#eff6ff; border-color:#3b82f6; border-style:solid; }
+    .drop-zone.col-amber.over { background:#fffbeb; border-color:#f59e0b; border-style:solid; }
+    .drop-hint { display:flex; align-items:center; justify-content:center; flex:1; min-height:60px; }
+    .drop-hint p { font-size:12px; color:#bbb; font-weight:500; text-align:center; }
+
+    /* Placed card */
+    .placed-card { background:#fff; border-radius:10px; padding:10px 12px; cursor:grab; border:2px solid #e5e5e3; transition:all 0.15s; user-select:none; position:relative; }
+    .placed-card:hover { box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+    .placed-card:active { cursor:grabbing; }
+    .placed-card .col-stripe { height:3px; border-radius:2px; margin-bottom:8px; }
+    .col-green .placed-card .col-stripe { background:#4a8a4a; }
+    .col-blue .placed-card .col-stripe { background:#3b82f6; }
+    .col-amber .placed-card .col-stripe { background:#f59e0b; }
+    .col-stone .placed-card .col-stripe { background:#a8a29e; }
+    .placed-card h3 { font-size:11px; font-weight:700; color:#1c1c1c; line-height:1.4; margin-bottom:3px; }
+    .placed-card p { font-size:10px; color:#888; line-height:1.5; }
+    .placed-hint { font-size:10px; color:#ccc; margin-top:6px; }
+    .placed-card:hover .placed-hint { color:#888; }
+
+    /* Bottom bar */
+    .bottombar { background:#fff; border-top:2px solid #e5e5e3; padding:12px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; box-shadow:0 -1px 4px rgba(0,0,0,0.06); }
+    .msg { font-size:13px; font-weight:600; padding:8px 14px; border-radius:10px; border:2px solid; }
+    .msg-error { background:#fff5f5; color:#dc2626; border-color:#fca5a5; }
+    .msg-success { background:#f0f7f0; color:#2d5a2d; border-color:#86efac; }
+    .bottombar-actions { display:flex; align-items:center; gap:10px; margin-left:auto; }
+    .reset-btn { font-size:13px; font-weight:600; color:#777; background:none; border:2px solid #e5e5e3; padding:9px 16px; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+    .reset-btn:hover { background:#f5f5f3; color:#1c1c1c; border-color:#ccc; }
+    .export-btn { font-size:14px; font-weight:700; color:#fff; background:#4a8a4a; border:none; padding:10px 22px; border-radius:10px; cursor:pointer; display:flex; align-items:center; gap:8px; transition:all 0.15s; box-shadow:0 2px 6px rgba(74,138,74,0.3); }
+    .export-btn:hover { background:#2d5a2d; box-shadow:0 3px 10px rgba(74,138,74,0.4); transform:translateY(-1px); }
+
+    /* Modal */
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); z-index:200; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .modal { background:#fff; border-radius:20px; max-width:520px; width:100%; max-height:88vh; overflow-y:auto; box-shadow:0 20px 60px rgba(0,0,0,0.2); border:2px solid #e5e5e3; animation:popIn 0.2s ease both; }
+    .modal-inner { padding:28px; }
+    .modal-tag { font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:#4a8a4a; margin-bottom:8px; }
+    .modal-title { font-size:20px; font-weight:800; color:#1c1c1c; line-height:1.3; margin-bottom:16px; }
+    .modal-desc { font-size:14px; color:#444; line-height:1.7; margin-bottom:20px; }
+    .modal-close { float:right; background:#f5f5f3; border:none; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:14px; font-weight:800; color:#555; transition:all 0.15s; margin-left:12px; margin-top:2px; }
+    .modal-close:hover { background:#e5e5e3; color:#1c1c1c; }
+    .modal-section { border-radius:12px; padding:16px; margin-bottom:12px; border:2px solid; }
+    .modal-section h3 { font-size:11px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; }
+    .modal-section-green { background:#f0f7f0; border-color:#c8e6c8; }
+    .modal-section-green h3 { color:#2d5a2d; }
+    .modal-section-amber { background:#fffbeb; border-color:#fde68a; }
+    .modal-section-amber h3 { color:#92400e; }
+    .modal-section-stone { background:#f5f5f3; border-color:#e5e5e3; }
+    .modal-section-stone h3 { color:#44403c; }
+    .modal-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
+    .modal-list li { font-size:13px; color:#444; line-height:1.5; display:flex; gap:8px; }
+    .modal-list li span { flex-shrink:0; font-weight:700; }
+    .modal-why { font-size:14px; color:#3a5a3a; line-height:1.7; }
+
+    /* Confirm dialog */
+    .confirm-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); z-index:300; display:flex; align-items:center; justify-content:center; padding:16px; }
+    .confirm-box { background:#fff; border-radius:18px; padding:28px; max-width:360px; width:100%; box-shadow:0 16px 48px rgba(0,0,0,0.18); border:2px solid #e5e5e3; animation:popIn 0.2s ease both; }
+    .confirm-box h3 { font-size:17px; font-weight:800; color:#1c1c1c; margin-bottom:8px; }
+    .confirm-box p { font-size:14px; color:#666; margin-bottom:20px; line-height:1.6; }
+    .confirm-actions { display:flex; gap:10px; justify-content:flex-end; }
+    .confirm-cancel { font-size:13px; font-weight:600; color:#555; background:#f5f5f3; border:2px solid #e5e5e3; padding:9px 18px; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+    .confirm-cancel:hover { background:#e5e5e3; }
+    .confirm-ok { font-size:13px; font-weight:700; color:#fff; background:#dc2626; border:none; padding:9px 18px; border-radius:10px; cursor:pointer; transition:all 0.15s; }
+    .confirm-ok:hover { background:#b91c1c; }
+
+    /* Dashboard */
+    .dash-content { max-width:900px; margin:0 auto; padding:28px 20px; }
+    .upload-zone { border:2px dashed #c8c8c4; border-radius:18px; padding:40px 24px; text-align:center; cursor:pointer; transition:all 0.2s; background:#fff; margin-bottom:20px; }
+    .upload-zone:hover, .upload-zone.over { border-color:#4a8a4a; background:#f0f7f0; }
+    .upload-icon { width:48px; height:48px; background:#f0f7f0; border:2px solid #c8e6c8; border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:22px; }
+    .upload-title { font-size:15px; font-weight:700; color:#1c1c1c; margin-bottom:4px; }
+    .upload-sub { font-size:13px; color:#888; font-weight:500; }
+    .chips { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; align-items:center; }
+    .chip { display:flex; align-items:center; gap:8px; background:#fff; border:2px solid #e5e5e3; border-radius:10px; padding:6px 12px; font-size:13px; font-weight:600; color:#444; }
+    .chip-remove { background:none; border:none; cursor:pointer; font-size:13px; font-weight:800; color:#aaa; padding:0 2px; transition:color 0.15s; }
+    .chip-remove:hover { color:#dc2626; }
+    .tabs { display:flex; gap:2px; border-bottom:2px solid #e5e5e3; margin-bottom:24px; }
+    .tab-btn { font-size:14px; font-weight:700; color:#888; background:none; border:none; border-bottom:3px solid transparent; padding:10px 18px; cursor:pointer; transition:all 0.15s; margin-bottom:-2px; }
+    .tab-btn.active { color:#2d5a2d; border-bottom-color:#4a8a4a; }
+    .tab-btn:hover:not(.active) { color:#444; }
+    .no-data { text-align:center; padding:60px 20px; color:#999; font-size:14px; font-weight:500; }
+
+    /* Ranking rows */
+    .rank-row { background:#fff; border:2px solid #e5e5e3; border-radius:14px; padding:14px 18px; display:flex; align-items:center; gap:14px; margin-bottom:8px; transition:border-color 0.15s; }
+    .rank-row:hover { border-color:#ccc; }
+    .rank-num { font-size:18px; font-weight:800; color:#d4d4d0; width:28px; text-align:center; flex-shrink:0; }
+    .rank-info { flex:1; min-width:0; }
+    .rank-title { font-size:14px; font-weight:700; color:#1c1c1c; }
+    .rank-sub { font-size:12px; color:#888; margin-top:2px; }
+    .rank-col-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; border:2px solid; flex-shrink:0; }
+    .rank-bar-wrap { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+    .rank-bar-bg { width:100px; height:8px; background:#e5e5e3; border-radius:4px; overflow:hidden; }
+    .rank-bar-fill { height:100%; border-radius:4px; transition:width 0.6s ease; }
+    .rank-score { font-size:12px; font-weight:800; color:#555; width:28px; text-align:right; }
+    .align-badge { font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; border:2px solid; flex-shrink:0; display:flex; align-items:center; gap:5px; }
+    .align-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+    .align-strong { background:#f0f7f0; color:#2d5a2d; border-color:#c8e6c8; }
+    .align-strong .align-dot { background:#4a8a4a; }
+    .align-mixed { background:#fffbeb; color:#92400e; border-color:#fde68a; }
+    .align-mixed .align-dot { background:#f59e0b; }
+    .align-disagree { background:#fff5f5; color:#dc2626; border-color:#fca5a5; }
+    .align-disagree .align-dot { background:#ef4444; }
+
+    /* Breakdown */
+    .breakdown-col { border-radius:16px; border:2px solid; padding:20px; margin-bottom:16px; }
+    .breakdown-col-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .breakdown-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+    .breakdown-col-title { font-size:15px; font-weight:800; }
+    .breakdown-card-row { background:#fff; border:2px solid #e5e5e3; border-radius:10px; padding:10px 14px; display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+    .breakdown-card-name { font-size:13px; font-weight:700; color:#1c1c1c; flex:1; }
+    .dot-row { display:flex; gap:4px; align-items:center; }
+    .vote-dot { width:12px; height:12px; border-radius:50%; border:2px solid; }
+    .vote-count { font-size:12px; font-weight:700; color:#666; }
+
+    /* Timeline */
+    .wave-block { border-radius:16px; border:2px solid; padding:20px; margin-bottom:14px; }
+    .wave-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .wave-dot { width:14px; height:14px; border-radius:50%; flex-shrink:0; }
+    .wave-label { font-size:18px; font-weight:800; }
+    .wave-sub { font-size:12px; color:#777; font-weight:500; margin-top:1px; }
+    .wave-count { font-size:13px; font-weight:700; color:#888; margin-left:auto; }
+    .wave-cards { display:flex; flex-wrap:wrap; gap:10px; }
+    .wave-card { background:#fff; border:2px solid #e5e5e3; border-radius:12px; padding:12px 14px; max-width:260px; }
+    .wave-card-title { font-size:13px; font-weight:700; color:#1c1c1c; margin-bottom:3px; }
+    .wave-card-sub { font-size:11px; color:#888; line-height:1.5; margin-bottom:6px; }
+    .wave-card-meta { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+    .score-tag { font-size:11px; font-weight:700; color:#aaa; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+// ── Data ────────────────────────────────────────────────────────────────────
+
+const CARDS = [
+  { id:1, title:"Flexible Mid-Sprint Re-Scoping", shortSummary:"Allow work to be adjusted when complexity grows during delivery.", description:"Introduce clearer and safer mechanisms for adjusting sprint scope when new complexity, dependencies, or unknowns emerge during delivery.", whyItMatters:"The team expressed that work often changes size once delivery begins, creating pressure to maintain timelines even when the work evolves.", benefits:["Reduces delivery pressure","Improves quality outcomes","Supports sustainable pacing","Creates safer escalation pathways","Encourages realistic planning"], risks:["May reduce predictability if overused","Requires stronger communication and prioritisation discipline"] },
+  { id:2, title:"Improve Sprint Sizing Conversations", shortSummary:"Create more realistic conversations about effort, unknowns and complexity.", description:"Introduce more collaborative and transparent sprint sizing discussions that account for learning curves, dependencies and emerging unknowns.", whyItMatters:"The workshop identified that sprint scope can sometimes feel too ambitious for the available time.", benefits:["More achievable sprint commitments","Improved confidence entering delivery","Better visibility of risks early","Healthier expectations across the team"], risks:["Planning discussions may initially take longer","Requires openness around uncertainty"] },
+  { id:3, title:"Permission to Push Work Forward", shortSummary:"Create explicit permission to move work into future sprints when needed.", description:"Introduce a shared agreement that allows work to move into future sprints when scope changes or new information emerges.", whyItMatters:"The team highlighted implicit pressure to continue delivering within original sprint boundaries even when complexity increases.", benefits:["Reduces burnout pressure","Supports quality delivery","Improves psychological safety","Encourages healthier trade-off discussions"], risks:["Could create delivery drift if not managed carefully","Requires prioritisation clarity"] },
+  { id:4, title:"Increase Early Planning Involvement", shortSummary:"Bring more team members into planning earlier.", description:"Increase participation in planning and scoping conversations before sprint commencement.", whyItMatters:"Team members expressed that work sometimes enters sprints before enough shared understanding exists.", benefits:["Improves preparedness","Creates stronger shared understanding","Reduces surprise complexity","Builds team ownership"], risks:["Additional planning time required","Could increase meeting load if not lightweight"] },
+  { id:5, title:"Improve Visibility of Upcoming Work", shortSummary:"Provide clearer visibility of future sprint work earlier.", description:"Create better visibility of upcoming work 1–2 sprints ahead to allow preparation and forward planning.", whyItMatters:"The team linked preparedness directly to confidence and psychological safety.", benefits:["Reduces anxiety and panic","Improves planning confidence","Supports smoother delivery","Enables better meeting preparation"], risks:["Future priorities may still shift","Requires ongoing backlog visibility"] },
+  { id:6, title:"Protected Preparation Time", shortSummary:"Allocate dedicated time for planning, thinking and meeting preparation.", description:"Introduce protected preparation time ahead of key meetings, playback sessions and sprint activities.", whyItMatters:"The workshop surfaced strong concern around last-minute asks and insufficient time to think before delivery.", benefits:["Improves quality of thinking","Reduces stress and panic","Supports more confident collaboration","Creates calmer delivery rhythms"], risks:["May reduce immediate delivery capacity","Needs organisational discipline to protect time"] },
+  { id:7, title:"Introduce Flex Days", shortSummary:"Build flexibility into sprint structures for recovery and adjustment.", description:"Trial introducing flex days within or between sprints to support recovery, overflow work, and unexpected complexity.", whyItMatters:"The team raised concerns about the sustainability of continuous high-speed delivery.", benefits:["Supports sustainable pacing","Improves focus and recovery","Creates room for adaptation","May improve overall quality"], risks:["Could reduce perceived delivery velocity","Needs clear intent and structure"] },
+  { id:8, title:"Protected Focus Time", shortSummary:"Create uninterrupted time for deeper work and problem solving.", description:"Introduce regular protected focus periods with reduced interruptions and meeting load.", whyItMatters:"The team described difficulty maintaining quality under constant delivery pressure.", benefits:["Improves concentration and output quality","Supports deeper problem solving","Reduces cognitive overload","Enhances productivity"], risks:["May reduce responsiveness during focus periods","Requires team-wide coordination"] },
+  { id:9, title:"Clarify Expectations Earlier", shortSummary:"Reduce ambiguity around scope, priorities and delivery expectations.", description:"Create clearer conversations around expectations, priorities and success measures earlier in the sprint lifecycle.", whyItMatters:"A recurring theme throughout the workshop was the need to turn ambiguity into clarity.", benefits:["Improves alignment","Reduces confusion and rework","Builds delivery confidence","Supports healthier collaboration"], risks:["Expectations may still evolve over time","Requires proactive communication habits"] },
+  { id:10, title:"Earlier Scope Change Discussions", shortSummary:"Discuss emerging changes in scope as soon as they appear.", description:"Introduce lightweight checkpoints for surfacing and discussing scope changes earlier during delivery.", whyItMatters:"Scope growth was repeatedly identified as a major source of pressure.", benefits:["Improves visibility of risk","Creates earlier intervention opportunities","Supports healthier workload management","Reduces surprise escalation"], risks:["Could increase coordination overhead","Requires psychological safety to raise concerns"] },
+  { id:11, title:"Regular Vibe Check Meetings", shortSummary:"Create lightweight check-ins focused on team wellbeing and delivery health.", description:"Introduce short recurring check-ins that allow the team to openly discuss energy levels, concerns and delivery pressures.", whyItMatters:"The workshop surfaced the importance of emotional sustainability and safe communication.", benefits:["Improves psychological safety","Builds stronger team connection","Helps surface concerns early","Encourages healthier communication"], risks:["Can feel repetitive if poorly facilitated","Requires openness and trust"] },
+  { id:12, title:"Increase In-Person Collaboration", shortSummary:"Create more opportunities for face-to-face problem solving and ideation.", description:"Increase intentional opportunities for in-person collaboration during key planning or problem-solving moments.", whyItMatters:"Team members consistently described in-person collaboration as energising and highly effective.", benefits:["Improves communication quality","Strengthens team cohesion","Encourages collaborative thinking","May accelerate problem solving"], risks:["Scheduling complexity","Not always feasible for all participants"] },
+  { id:13, title:"Collaborative Thinking Time", shortSummary:"Create more dedicated space for ideation and shared problem solving.", description:"Build intentional collaborative thinking sessions into sprint rhythms rather than focusing only on delivery execution.", whyItMatters:"The team noted that fast delivery pace can reduce opportunities for deeper collaboration.", benefits:["Encourages innovation","Improves shared understanding","Strengthens team relationships","Supports better solutions"], risks:["Takes time away from delivery activities","Needs facilitation to remain productive"] },
+  { id:14, title:"Lightweight Mid-Sprint Checkpoints", shortSummary:"Introduce small progress check-ins during the sprint.", description:"Create lightweight opportunities during the sprint to share progress, emerging outputs and concerns.", whyItMatters:"The team expressed a desire for safer and earlier escalation pathways when challenges emerge.", benefits:["Improves visibility and support","Helps identify blockers earlier","Encourages ongoing alignment","Supports adaptive delivery"], risks:["Additional coordination overhead","Can become status-heavy if not lightweight"] },
+  { id:15, title:"Build Psychological Safety Further", shortSummary:"Continue strengthening the environment for raising concerns safely.", description:"Continue evolving team practices that make it safe to raise concerns, ask questions and discuss delivery pressure early.", whyItMatters:"The workshop showed strong willingness to improve collaboratively, which is a valuable foundation to build upon.", benefits:["Encourages honesty and openness","Improves issue escalation","Strengthens team trust","Supports healthier collaboration"], risks:["Requires ongoing reinforcement","Trust-building takes time"] },
+  { id:16, title:"Increase Team Co-Location", shortSummary:"Work together more regularly in the same physical space.", description:"Encourage more intentional co-location of the team within the same area on Level 7, Building 168, particularly during key sprint, planning or collaboration periods.", whyItMatters:"The workshop highlighted that in-person collaboration often feels more effective, energising and supportive.", benefits:["Improves real-time communication","Reduces delays and misunderstandings","Encourages spontaneous collaboration","Strengthens team connection","Supports faster problem solving"], risks:["May not suit all working preferences","Requires workspace coordination","Could reduce remote flexibility"] },
+  { id:17, title:"Evolve Stand-Up Conversations", shortSummary:"Adjust stand-ups to allow deeper discussion around active project streams.", description:"Explore evolving stand-up formats to create more space for meaningful project discussions, emerging blockers and collaborative problem solving.", whyItMatters:"The workshop surfaced a need for earlier escalation, better communication visibility, and more collaborative discussion during delivery.", benefits:["Improves visibility of emerging issues","Supports faster alignment","Encourages collaborative problem solving","Helps surface blockers earlier"], risks:["Stand-ups may become too long if not facilitated","Could reduce efficiency if discussions lose focus"] },
+];
+
+const PRINCIPLES = [
+  { title:"Sprints are not fixed commitments", body:"If complexity emerges, we adapt. Re-scoping, slowing down, or moving work forward is considered good judgement — not failure." },
+  { title:"Less, but better", body:"Quality, clarity, and thoughtful delivery are more valuable than trying to do everything at once." },
+  { title:"Preparation matters", body:"The more shared understanding and shaping that happens before work enters a sprint, the more confident and sustainable delivery becomes." },
+  { title:"Sustainable pace is the goal", body:"We are aiming for a healthy and maintainable rhythm of work — one that protects focus, quality, collaboration, and wellbeing over time." },
+  { title:"Surface things early", body:"We want to create an environment where complexity, concerns, trade-offs, and changing expectations can be raised early and discussed openly." },
+  { title:"Collaboration strengthens outcomes", body:"Open communication, shared problem solving, and intentional collaboration help create stronger delivery outcomes and healthier team dynamics." },
+  { title:"Continuous improvement over perfection", body:"This exercise is about identifying small, achievable experiments that we can trial, reflect on, and continue improving together." },
+];
+
+const COLUMNS = [
+  { id:'trial-immediately', label:'Trial Immediately', sublabel:'Start these first', max:5, theme:'col-green', barColor:'#4a8a4a', badgeBg:'#4a8a4a', badgeColor:'#fff', score:4 },
+  { id:'trial-soon',        label:'Trial Soon',        sublabel:'Introduce in the next wave', max:5, theme:'col-blue',  barColor:'#3b82f6', badgeBg:'#3b82f6', badgeColor:'#fff', score:3 },
+  { id:'worth-exploring',   label:'Worth Exploring',   sublabel:'', max:null, theme:'col-amber', barColor:'#f59e0b', badgeBg:'#f59e0b', badgeColor:'#fff', score:2 },
+  { id:'park-for-now',      label:'Park for Now',      sublabel:'Lower priority right now', max:null, theme:'col-stone', barColor:'#a8a29e', badgeBg:'#78716c', badgeColor:'#fff', score:1 },
+];
+
+const COL_SCORE = {};
+COLUMNS.forEach(c => { COL_SCORE[c.id] = c.score; });
+
+// ── Storage ──────────────────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'tp_vote_v2';
+function saveLocal(placements) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ placements, updatedAt: new Date().toISOString() }));
+}
+function loadLocal() {
+  try { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+}
+function clearLocal() { localStorage.removeItem(STORAGE_KEY); }
+
+// ── CSV export ────────────────────────────────────────────────────────────────
+
+function exportCSV(placements) {
+  const rows = [['Card ID','Card Title','Priority Column','Score']];
+  CARDS.forEach(card => {
+    const colId = placements[card.id];
+    const col = COLUMNS.find(c => c.id === colId);
+    rows.push([card.id, card.title, col ? col.label : 'Not placed', col ? col.score : '']);
+  });
+  const csv = rows.map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `priorities-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── CSV parse (dashboard) ─────────────────────────────────────────────────────
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n').slice(1);
+  const placements = {};
+  lines.forEach(line => {
+    const cols = line.split(',').map(c => c.replace(/"/g,'').trim());
+    const id = parseInt(cols[0]);
+    const colLabel = cols[2];
+    const colDef = COLUMNS.find(c => c.label === colLabel);
+    if (!isNaN(id) && colDef) placements[id] = colDef.id;
+  });
+  return placements;
+}
+
+// ── Alignment helper ──────────────────────────────────────────────────────────
+
+function getAlignment(scores) {
+  if (scores.length < 2) return null;
+  const mean = scores.reduce((a,b)=>a+b,0)/scores.length;
+  const sd = Math.sqrt(scores.reduce((a,b)=>a+Math.pow(b-mean,2),0)/scores.length);
+  if (sd < 0.6) return { label:'Strong consensus', cls:'align-strong' };
+  if (sd < 1.2) return { label:'Mixed opinions',   cls:'align-mixed' };
+  return { label:'Significant disagreement', cls:'align-disagree' };
+}
+
+// ── CardModal ─────────────────────────────────────────────────────────────────
+
+function CardModal({ card, onClose }) {
+  useEffect(() => {
+    const fn = e => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', fn);
+    return () => window.removeEventListener('keydown', fn);
+  }, []);
+  if (!card) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()}>
+        <div className="modal-inner">
+          <button className="modal-close" onClick={onClose} aria-label="Close">✕</button>
+          <div className="modal-tag">Improvement card</div>
+          <div className="modal-title">{card.title}</div>
+          <p className="modal-desc">{card.description}</p>
+          <div className="modal-section modal-section-green">
+            <h3>Why this matters</h3>
+            <p className="modal-why">{card.whyItMatters}</p>
+          </div>
+          <div className="modal-section modal-section-stone">
+            <h3>Benefits</h3>
+            <ul className="modal-list">
+              {card.benefits.map((b,i) => <li key={i}><span style={{color:'#4a8a4a'}}>→</span>{b}</li>)}
+            </ul>
+          </div>
+          <div className="modal-section modal-section-amber">
+            <h3>Considerations</h3>
+            <ul className="modal-list">
+              {card.risks.map((r,i) => <li key={i}><span style={{color:'#f59e0b'}}>·</span>{r}</li>)}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── WelcomeScreen ─────────────────────────────────────────────────────────────
+
+function WelcomeScreen({ onVote, onDashboard }) {
+  return (
+    <div className="screen fade-in">
+      <div className="hero">
+        <div className="hero-inner">
+          <div className="hero-tag">Team Workshop</div>
+          <h1>What should we try first?</h1>
+          <p>Privately sort improvement ideas into priorities. Export your results — we'll combine them to see where the team aligns.</p>
+          <div className="btn-row">
+            <button className="btn-primary" onClick={onVote}>Start prioritising</button>
+            <button className="btn-secondary" onClick={onDashboard}>View combined results</button>
+          </div>
+        </div>
+      </div>
+      <div className="section">
+        <div className="section-title">How this works</div>
+        <div className="section-sub">Three simple steps</div>
+        <div className="steps-grid">
+          {[
+            { n:'01', t:'Read the cards', b:'Explore each improvement idea. Double-click any card to learn what it means and why it matters.' },
+            { n:'02', t:'Sort into columns', b:'Drag each card into one of four priority columns — from Trial Immediately through to Park for Now.' },
+            { n:'03', t:'Export and send', b:'Download your results as a CSV and email it to Damian. Results are shown anonymously.' },
+          ].map((s,i) => (
+            <div className="step-card" key={i}>
+              <div className="step-num">{s.n}</div>
+              <h3>{s.t}</h3>
+              <p>{s.b}</p>
+            </div>
+          ))}
+        </div>
+        <div className="section-title">Our shared principles</div>
+        <div className="section-sub" style={{marginBottom:'24px'}}>Let these guide your thinking as you prioritise</div>
+        <div className="principles-grid">
+          {PRINCIPLES.map((p,i) => (
+            <div className="principle" key={i}>
+              <div className="principle-dot" />
+              <div>
+                <h4>{p.title}</h4>
+                <p>{p.body}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── VotingScreen ──────────────────────────────────────────────────────────────
+
+function VotingScreen({ onBack, onDashboard }) {
+  const [placements, setPlacements] = useState({});
+  const [modalCard, setModalCard] = useState(null);
+  const [msg, setMsg] = useState(null); // { text, type }
+  const [limitMsg, setLimitMsg] = useState('');
+  const [showReset, setShowReset] = useState(false);
+  const [exported, setExported] = useState(false);
+  const [returning, setReturning] = useState(false);
+  const [dragOver, setDragOver] = useState(null); // colId | null
+  const dragCard = useRef(null);
+  const dragFromCol = useRef(null);
+  const saveTimer = useRef(null);
+
+  useEffect(() => {
+    const saved = loadLocal();
+    if (saved && Object.keys(saved.placements || {}).length > 0) {
+      setPlacements(saved.placements);
+      setReturning(true);
+    }
+  }, []);
+
+  function autoSave(p) {
+    clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => saveLocal(p), 700);
+  }
+
+  const placedIds = new Set(Object.keys(placements).map(Number));
+  const unplaced = CARDS.filter(c => !placedIds.has(c.id));
+  const placedCount = placedIds.size;
+
+  function countInCol(colId) { return Object.values(placements).filter(v => v === colId).length; }
+  function cardsInCol(colId) { return CARDS.filter(c => placements[c.id] === colId); }
+
+  function onDragStart(e, card, fromCol) {
+    dragCard.current = card;
+    dragFromCol.current = fromCol;
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDrop(e, colId) {
+    e.preventDefault();
+    setDragOver(null);
+    if (!dragCard.current) return;
+    const col = COLUMNS.find(c => c.id === colId);
+    const already = placements[dragCard.current.id] === colId;
+    if (col.max && !already && countInCol(colId) >= col.max) {
+      setLimitMsg(`"${col.label}" is limited to ${col.max} cards — move one out first.`);
+      setTimeout(() => setLimitMsg(''), 3500);
+      return;
+    }
+    const next = { ...placements, [dragCard.current.id]: colId };
+    setPlacements(next);
+    autoSave(next);
+    setMsg(null);
+    dragCard.current = null;
+  }
+
+  function onDropLibrary(e) {
+    e.preventDefault();
+    setDragOver(null);
+    if (!dragCard.current || dragFromCol.current === null) return;
+    const next = { ...placements };
+    delete next[dragCard.current.id];
+    setPlacements(next);
+    autoSave(next);
+    dragCard.current = null;
+  }
+
+  function handleExport() {
+    if (unplaced.length > 0) {
+      setMsg({ text:`${unplaced.length} card${unplaced.length!==1?'s':''} still need placing before you can export.`, type:'error' });
+      return;
+    }
+    exportCSV(placements);
+    saveLocal(placements);
+    setExported(true);
+    setMsg({ text:'✓ CSV downloaded — email it to Damian to include in the combined results.', type:'success' });
+  }
+
+  function handleReset() {
+    setPlacements({});
+    setExported(false);
+    setMsg(null);
+    setShowReset(false);
+    clearLocal();
+  }
+
+  const pct = Math.round((placedCount / CARDS.length) * 100);
+
+  return (
+    <div className="screen" style={{display:'flex',flexDirection:'column',height:'100vh'}}>
+      {/* Top bar */}
+      <div className="topbar">
+        <div className="topbar-left">
+          <button className="back-btn" onClick={onBack}>← Home</button>
+          <div className="progress-wrap">
+            <div className="progress-bar-bg">
+              <div className="progress-bar-fill" style={{width:`${pct}%`}} />
+            </div>
+            <span className="progress-label">{placedCount}/{CARDS.length}</span>
+          </div>
+        </div>
+        <div className="topbar-right">
+          <button className="topbar-btn" onClick={onDashboard}>View results</button>
+        </div>
+      </div>
+
+      {/* Banners */}
+      {returning && (
+        <div className="banner banner-green">
+          <span>Your previous prioritisation has been restored — keep going or adjust anytime.</span>
+          <button className="banner-close" onClick={() => setReturning(false)}>✕</button>
+        </div>
+      )}
+      {limitMsg && (
+        <div className="banner banner-amber">
+          <span>⚠️ {limitMsg}</span>
+          <button className="banner-close" onClick={() => setLimitMsg('')}>✕</button>
+        </div>
+      )}
+
+      {/* Workspace */}
+      <div className="workspace" style={{flex:1,overflow:'hidden'}}>
+        {/* Library */}
+        <div className="library" onDragOver={e=>e.preventDefault()} onDrop={onDropLibrary}>
+          <div className="library-header">
+            <h2>Cards to place</h2>
+            <p>{unplaced.length > 0 ? `${unplaced.length} remaining` : 'All placed ✓'}</p>
+          </div>
+          <div className="library-cards">
+            {unplaced.map(card => (
+              <div
+                key={card.id}
+                className="lib-card fade-in"
+                draggable
+                onDragStart={e => onDragStart(e, card, null)}
+                onDoubleClick={() => setModalCard(card)}
+              >
+                <h3>{card.title}</h3>
+                <p>{card.shortSummary}</p>
+                <div className="hint">Double-click to read more</div>
+              </div>
+            ))}
+            {unplaced.length === 0 && (
+              <div className="all-placed">
+                <div className="tick">✓</div>
+                <p>All cards placed</p>
+                <small>Drag between columns to adjust</small>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Columns */}
+        <div className="columns-area">
+          <div className="columns-inner">
+            {COLUMNS.map(col => {
+              const cards = cardsInCol(col.id);
+              const count = cards.length;
+              const atLimit = col.max && count >= col.max;
+              const isOver = dragOver === col.id;
+              return (
+                <div key={col.id} className={`col-wrap ${col.theme}`}>
+                  <div className="col-header">
+                    <div className="col-header-top">
+                      <span className="col-title">{col.label}</span>
+                      <span
+                        className="col-badge"
+                        style={atLimit
+                          ? {background:'#dc2626',color:'#fff'}
+                          : {background:col.badgeBg, color:col.badgeColor}
+                        }
+                      >
+                        {count}{col.max ? `/${col.max}` : ''}
+                      </span>
+                    </div>
+                    {col.sublabel && <div className="col-sub">{col.sublabel}</div>}
+                    {atLimit && <div className="col-limit-warn">Limit reached</div>}
+                  </div>
+                  <div
+                    className={`drop-zone ${isOver && !atLimit ? 'over' : ''} ${isOver && atLimit ? 'over-limit' : ''}`}
+                    onDragOver={e => { e.preventDefault(); setDragOver(col.id); }}
+                    onDragLeave={() => setDragOver(null)}
+                    onDrop={e => onDrop(e, col.id)}
+                  >
+                    {cards.length === 0 && (
+                      <div className="drop-hint"><p>Drop cards here</p></div>
+                    )}
+                    {cards.map(card => (
+                      <div
+                        key={card.id}
+                        className="placed-card"
+                        draggable
+                        onDragStart={e => onDragStart(e, card, col.id)}
+                        onDoubleClick={() => setModalCard(card)}
+                      >
+                        <div className="col-stripe" />
+                        <h3>{card.title}</h3>
+                        <p>{card.shortSummary}</p>
+                        <div className="placed-hint">Double-click to read · drag to move</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div className="bottombar">
+        <div>
+          {msg && <div className={`msg ${msg.type==='error'?'msg-error':'msg-success'}`}>{msg.text}</div>}
+        </div>
+        <div className="bottombar-actions">
+          <button className="reset-btn" onClick={() => setShowReset(true)}>Reset</button>
+          <button className="export-btn" onClick={handleExport}>
+            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Export as CSV
+          </button>
+        </div>
+      </div>
+
+      {/* Modal */}
+      {modalCard && <CardModal card={modalCard} onClose={() => setModalCard(null)} />}
+
+      {/* Reset confirm */}
+      {showReset && (
+        <div className="confirm-overlay">
+          <div className="confirm-box">
+            <h3>Reset your priorities?</h3>
+            <p>This will clear all your card placements. You'll need to start again.</p>
+            <div className="confirm-actions">
+              <button className="confirm-cancel" onClick={() => setShowReset(false)}>Cancel</button>
+              <button className="confirm-ok" onClick={handleReset}>Yes, reset</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Dashboard ─────────────────────────────────────────────────────────────────
+
+function Dashboard({ onBack, onVote }) {
+  const [votes, setVotes] = useState([]);
+  const [tab, setTab] = useState('ranking');
+  const [dragOver, setDragOver] = useState(false);
+  const fileRef = useRef(null);
+
+  function processFiles(files) {
+    const readers = Array.from(files).map(f => new Promise(res => {
+      const r = new FileReader();
+      r.onload = e => res({ name: f.name, placements: parseCSV(e.target.result) });
+      r.readAsText(f);
+    }));
+    Promise.all(readers).then(results => setVotes(prev => [...prev, ...results]));
+  }
+
+  function handleDrop(e) {
+    e.preventDefault(); setDragOver(false);
+    const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
+    if (files.length) processFiles(files);
+  }
+
+  const count = votes.length;
+
+  const cardStats = CARDS.map(card => {
+    const scores = votes.map(v => {
+      const colId = v.placements[card.id];
+      return colId ? COL_SCORE[colId] : null;
+    }).filter(s => s !== null);
+
+    const colCounts = {};
+    COLUMNS.forEach(c => { colCounts[c.id] = 0; });
+    votes.forEach(v => { const c = v.placements[card.id]; if (c) colCounts[c]++; });
+
+    const avgScore = scores.length ? scores.reduce((a,b)=>a+b,0)/scores.length : 0;
+    const topCol = scores.length
+      ? COLUMNS.reduce((best,c) => (colCounts[c.id] > (colCounts[best?.id]||0) ? c : best), null)
+      : null;
+
+    return { card, scores, avgScore, colCounts, topCol, alignment: getAlignment(scores), votedCount: scores.length };
+  }).sort((a,b) => b.avgScore - a.avgScore);
+
+  // Group cards by dominant column for timeline
+  const waveGroups = COLUMNS.map(col => ({
+    col,
+    cards: cardStats.filter(cs => cs.votedCount > 0 && cs.topCol?.id === col.id)
+      .sort((a,b) => b.avgScore - a.avgScore),
+  }));
+
+  const WAVE_LABELS = {
+    'trial-immediately': { period:'June', sub:'Top "Trial Immediately" experiments' },
+    'trial-soon':        { period:'July', sub:'Most supported "Trial Soon" improvements' },
+    'worth-exploring':   { period:'August', sub:'"Worth Exploring" initiatives' },
+    'park-for-now':      { period:'Future / Backlog', sub:'"Park for Now" — revisit later' },
+  };
+
+  return (
+    <div className="screen fade-in">
+      <div className="topbar">
+        <div className="topbar-left">
+          <button className="back-btn" onClick={onBack}>← Home</button>
+          <span style={{fontSize:'13px',fontWeight:'800',color:'#444',textTransform:'uppercase',letterSpacing:'0.08em'}}>Combined Results</span>
+        </div>
+        <button className="topbar-btn" onClick={onVote}>Go to voting →</button>
+      </div>
+
+      <div className="dash-content">
+        {/* Upload */}
+        <div
+          className={`upload-zone ${dragOver ? 'over' : ''}`}
+          onDragOver={e=>{e.preventDefault();setDragOver(true);}}
+          onDragLeave={()=>setDragOver(false)}
+          onDrop={handleDrop}
+          onClick={()=>fileRef.current.click()}
+          role="button" tabIndex={0}
+        >
+          <input ref={fileRef} type="file" accept=".csv" multiple style={{display:'none'}} onChange={e=>{processFiles(e.target.files);e.target.value='';}} />
+          <div className="upload-icon">⬆</div>
+          <div className="upload-title">Drop CSV files here, or click to select</div>
+          <div className="upload-sub">Upload one file per team member to combine results</div>
+        </div>
+
+        {/* Chips */}
+        {votes.length > 0 && (
+          <div className="chips">
+            {votes.map((v,i) => (
+              <div className="chip" key={i}>
+                <span>{v.name || `Response ${i+1}`}</span>
+                <button className="chip-remove" onClick={()=>setVotes(prev=>prev.filter((_,j)=>j!==i))}>✕</button>
+              </div>
+            ))}
+            <span style={{fontSize:'13px',fontWeight:'700',color:'#888'}}>{count} response{count!==1?'s':''} loaded</span>
+          </div>
+        )}
+
+        {count === 0 && <div className="no-data">Upload CSV files above to see combined results.</div>}
+
+        {count > 0 && (
+          <>
+            <div className="tabs">
+              {[['ranking','Priority ranking'],['breakdown','Column breakdown'],['timeline','Roadmap']].map(([id,label]) => (
+                <button key={id} className={`tab-btn ${tab===id?'active':''}`} onClick={()=>setTab(id)}>{label}</button>
+              ))}
+            </div>
+
+            {/* RANKING */}
+            {tab === 'ranking' && (
+              <div>
+                <p style={{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'16px'}}>
+                  Ranked by average priority score across {count} response{count!==1?'s':''}
+                </p>
+                {cardStats.map((cs,i) => {
+                  const col = COLUMNS.find(c => c.id === cs.topCol?.id);
+                  const barWidth = cs.avgScore > 0 ? `${(cs.avgScore/4)*100}%` : '0%';
+                  return (
+                    <div className="rank-row fade-in" key={cs.card.id} style={{animationDelay:`${i*0.02}s`}}>
+                      <div className="rank-num">{i+1}</div>
+                      <div className="rank-info">
+                        <div className="rank-title">{cs.card.title}</div>
+                        <div className="rank-sub">{cs.card.shortSummary}</div>
+                      </div>
+                      {col && (
+                        <span className="rank-col-badge" style={{background:col.badgeBg,color:col.badgeColor,borderColor:col.badgeBg}}>
+                          {col.label}
+                        </span>
+                      )}
+                      <div className="rank-bar-wrap">
+                        <div className="rank-bar-bg">
+                          <div className="rank-bar-fill" style={{width:barWidth, background:col?.barColor||'#ccc'}} />
+                        </div>
+                        <div className="rank-score">{cs.avgScore > 0 ? cs.avgScore.toFixed(1) : '—'}</div>
+                      </div>
+                      {cs.alignment && (
+                        <div className={`align-badge ${cs.alignment.cls}`}>
+                          <div className="align-dot" />
+                          {cs.alignment.label}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* BREAKDOWN */}
+            {tab === 'breakdown' && (
+              <div>
+                {COLUMNS.map(col => {
+                  const colCards = cardStats
+                    .filter(cs => cs.colCounts[col.id] > 0)
+                    .sort((a,b) => b.colCounts[col.id] - a.colCounts[col.id]);
+                  return (
+                    <div key={col.id} className="breakdown-col" style={{
+                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':col.theme==='col-amber'?'#fffbeb':'#f5f5f3',
+                      borderColor: col.barColor,
+                    }}>
+                      <div className="breakdown-col-header">
+                        <div className="breakdown-dot" style={{background:col.barColor}} />
+                        <div className="breakdown-col-title" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':col.theme==='col-amber'?'#92400e':'#44403c'}}>
+                          {col.label}
+                        </div>
+                        <span className="col-badge" style={{background:col.badgeBg,color:col.badgeColor,fontSize:'12px',padding:'3px 10px',borderRadius:'20px',fontWeight:'800'}}>
+                          {colCards.length} card{colCards.length!==1?'s':''}
+                        </span>
+                      </div>
+                      {colCards.length === 0
+                        ? <p style={{fontSize:'12px',color:'#aaa',fontStyle:'italic'}}>No cards placed here across responses</p>
+                        : colCards.map(cs => (
+                          <div className="breakdown-card-row" key={cs.card.id}>
+                            <div className="breakdown-card-name">{cs.card.title}</div>
+                            <div className="dot-row">
+                              {Array.from({length:count},(_,k) => (
+                                <div key={k} className="vote-dot" style={
+                                  k < cs.colCounts[col.id]
+                                    ? {background:col.barColor, borderColor:col.barColor}
+                                    : {background:'#f5f5f3', borderColor:'#d4d4d0'}
+                                } />
+                              ))}
+                              <span className="vote-count">{cs.colCounts[col.id]}/{count}</span>
+                            </div>
+                            {cs.alignment && (
+                              <div className={`align-badge ${cs.alignment.cls}`}>
+                                <div className="align-dot" />
+                                {cs.alignment.label}
+                              </div>
+                            )}
+                          </div>
+                        ))
+                      }
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* TIMELINE */}
+            {tab === 'timeline' && (
+              <div>
+                <p style={{fontSize:'12px',fontWeight:'700',color:'#888',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:'20px'}}>
+                  Suggested implementation roadmap based on combined priorities
+                </p>
+                {waveGroups.map(({col, cards}) => {
+                  const wl = WAVE_LABELS[col.id];
+                  return (
+                    <div key={col.id} className="wave-block" style={{
+                      background: col.theme==='col-green'?'#f0f7f0':col.theme==='col-blue'?'#eff6ff':col.theme==='col-amber'?'#fffbeb':'#f5f5f3',
+                      borderColor: col.barColor,
+                    }}>
+                      <div className="wave-header">
+                        <div className="wave-dot" style={{background:col.barColor}} />
+                        <div>
+                          <div className="wave-label" style={{color: col.theme==='col-green'?'#2d5a2d':col.theme==='col-blue'?'#1d4ed8':col.theme==='col-amber'?'#92400e':'#44403c'}}>
+                            {wl.period}
+                          </div>
+                          <div className="wave-sub">{wl.sub}</div>
+                        </div>
+                        <div className="wave-count">{cards.length} initiative{cards.length!==1?'s':''}</div>
+                      </div>
+                      {cards.length === 0
+                        ? <p style={{fontSize:'12px',color:'#aaa',fontStyle:'italic'}}>No cards assigned to this wave</p>
+                        : (
+                          <div className="wave-cards">
+                            {cards.map(cs => (
+                              <div className="wave-card" key={cs.card.id}>
+                                <div className="wave-card-title">{cs.card.title}</div>
+                                <div className="wave-card-sub">{cs.card.shortSummary}</div>
+                                <div className="wave-card-meta">
+                                  <span className="score-tag">Score: {cs.avgScore.toFixed(1)}</span>
+                                  {cs.alignment && (
+                                    <div className={`align-badge ${cs.alignment.cls}`} style={{fontSize:'11px'}}>
+                                      <div className="align-dot" />
+                                      {cs.alignment.label}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      }
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── App ───────────────────────────────────────────────────────────────────────
+
+function App() {
+  const [view, setView] = useState('welcome');
+  return (
+    <div>
+      {view === 'welcome' && <WelcomeScreen onVote={() => setView('voting')} onDashboard={() => setView('dashboard')} />}
+      {view === 'voting'  && <VotingScreen  onBack={() => setView('welcome')} onDashboard={() => setView('dashboard')} />}
+      {view === 'dashboard' && <Dashboard   onBack={() => setView('welcome')} onVote={() => setView('voting')} />}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
